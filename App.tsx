@@ -6,17 +6,37 @@ import {
   View,
   TouchableOpacity,
   TextInput,
+  ScrollView,
 } from 'react-native';
 import { theme } from './colors';
+
+interface ToDo {
+  text: string;
+  work: boolean;
+}
+
+const initialToDo: Record<string, ToDo> = {};
 
 export default function App() {
   const [working, setWorking] = React.useState(true);
   const [text, setText] = React.useState('');
+  const [toDoList, setToDoList] = React.useState(initialToDo);
 
   const work = () => setWorking(true);
   const travel = () => setWorking(false);
 
   const onChangeText = (payload: any) => setText(payload);
+  const addToDo = () => {
+    if (text === '') return;
+
+    const newToDos = {
+      ...toDoList,
+      [Date.now()]: { text, work: working },
+    };
+
+    setToDoList(newToDos);
+    setText('');
+  };
 
   return (
     <View style={styles.container}>
@@ -44,6 +64,7 @@ export default function App() {
         </TouchableOpacity>
       </View>
       <TextInput
+        onSubmitEditing={addToDo}
         onChangeText={onChangeText}
         value={text}
         keyboardType={'default'}
@@ -52,6 +73,13 @@ export default function App() {
         }
         style={styles.input}
       />
+      <ScrollView>
+        {Object.keys(toDoList).map((key: string) => (
+          <View style={styles.toDo} key={key}>
+            <Text style={styles.toDoText}>{toDoList[key].text}</Text>
+          </View>
+        ))}
+      </ScrollView>
     </View>
   );
 }
@@ -73,10 +101,23 @@ const styles = StyleSheet.create({
   },
   input: {
     marginTop: 25,
+    marginBottom: 25,
     paddingVertical: 15,
     paddingHorizontal: 20,
     backgroundColor: 'white',
     borderRadius: 30,
     fontSize: 20,
+  },
+  toDo: {
+    marginBottom: 10,
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+    backgroundColor: theme.grey,
+    borderRadius: 15,
+  },
+  toDoText: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: 'white',
   },
 });
