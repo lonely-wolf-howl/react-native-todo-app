@@ -9,32 +9,50 @@ import {
   ScrollView,
 } from 'react-native';
 import { theme } from './colors';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface ToDo {
   text: string;
-  work: boolean;
+  working: boolean;
 }
 
 const initialToDo: Record<string, ToDo> = {};
+
+const ASYNC_STORAGE_KEY = '@toDoList';
 
 export default function App() {
   const [working, setWorking] = React.useState(true);
   const [text, setText] = React.useState('');
   const [toDoList, setToDoList] = React.useState(initialToDo);
 
+  React.useEffect(() => {
+    loadToDoList();
+  }, []);
+
   const work = () => setWorking(true);
   const travel = () => setWorking(false);
 
+  const saveToDoList = async (paylaod: any) => {
+    await AsyncStorage.setItem(ASYNC_STORAGE_KEY, JSON.stringify(paylaod));
+  };
+  const loadToDoList = async () => {
+    const stored: string | null = await AsyncStorage.getItem(ASYNC_STORAGE_KEY);
+    if (stored) {
+      setToDoList(JSON.parse(stored));
+    }
+  };
+
   const onChangeText = (payload: any) => setText(payload);
-  const addToDo = () => {
+  const addToDo = async () => {
     if (text === '') return;
 
-    const newToDos = {
+    const newToDoList = {
       ...toDoList,
-      [Date.now()]: { text, work: working },
+      [Date.now()]: { text, working },
     };
 
-    setToDoList(newToDos);
+    setToDoList(newToDoList);
+    await saveToDoList(newToDoList);
     setText('');
   };
 
@@ -74,11 +92,13 @@ export default function App() {
         style={styles.input}
       />
       <ScrollView>
-        {Object.keys(toDoList).map((key: string) => (
-          <View style={styles.toDo} key={key}>
-            <Text style={styles.toDoText}>{toDoList[key].text}</Text>
-          </View>
-        ))}
+        {Object.keys(toDoList).map((key: string) =>
+          toDoList[key].working === working ? (
+            <View style={styles.toDo} key={key}>
+              <Text style={styles.toDoText}>{toDoList[key].text}</Text>
+            </View>
+          ) : null
+        )}
       </ScrollView>
     </View>
   );
@@ -114,6 +134,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     backgroundColor: theme.grey,
     borderRadius: 15,
+    opacity: 0.5,
   },
   toDoText: {
     fontSize: 15,
