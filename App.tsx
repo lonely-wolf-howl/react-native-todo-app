@@ -7,9 +7,11 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { theme } from './colors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Fontisto } from '@expo/vector-icons';
 
 interface ToDo {
   text: string;
@@ -55,6 +57,22 @@ export default function App() {
     await saveToDoList(newToDoList);
     setText('');
   };
+  const deleteToDo = (key: string) => {
+    Alert.alert('Delete Task', 'Are you sure?', [
+      { text: 'Cancel' },
+      {
+        text: 'Confirm',
+        style: 'destructive',
+        onPress: async () => {
+          const newToDoList = { ...toDoList };
+          delete newToDoList[key];
+
+          setToDoList(newToDoList);
+          await saveToDoList(newToDoList);
+        },
+      },
+    ]);
+  };
 
   return (
     <View style={styles.container}>
@@ -96,6 +114,9 @@ export default function App() {
           toDoList[key].working === working ? (
             <View style={styles.toDo} key={key}>
               <Text style={styles.toDoText}>{toDoList[key].text}</Text>
+              <TouchableOpacity onPress={() => deleteToDo(key)}>
+                <Fontisto name="trash" size={15} color={theme.white} />
+              </TouchableOpacity>
             </View>
           ) : null
         )}
@@ -126,9 +147,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     backgroundColor: 'white',
     borderRadius: 30,
-    fontSize: 20,
+    fontSize: 15,
   },
   toDo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginBottom: 10,
     paddingVertical: 20,
     paddingHorizontal: 20,
