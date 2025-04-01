@@ -1,31 +1,18 @@
 import React from 'react';
 import { StatusBar } from 'expo-status-bar';
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  TextInput,
-  ScrollView,
-  Alert,
-} from 'react-native';
-import { theme } from './colors';
+import { TextInput, ScrollView, View, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Fontisto } from '@expo/vector-icons';
-
-interface ToDo {
-  text: string;
-  working: boolean;
-}
-
-const initialToDo: Record<string, ToDo> = {};
+import { AppHeader } from './src/components/AppHeader';
+import { TodoItem } from './src/components/TodoItem';
+import { styles } from './src/styles/styles';
+import { ToDoList } from './src/types/todo';
 
 const ASYNC_STORAGE_KEY = '@toDoList';
 
 export default function App() {
   const [working, setWorking] = React.useState(true);
   const [text, setText] = React.useState('');
-  const [toDoList, setToDoList] = React.useState(initialToDo);
+  const [toDoList, setToDoList] = React.useState<ToDoList>({});
 
   React.useEffect(() => {
     loadToDoList();
@@ -34,9 +21,10 @@ export default function App() {
   const work = () => setWorking(true);
   const travel = () => setWorking(false);
 
-  const saveToDoList = async (paylaod: any) => {
-    await AsyncStorage.setItem(ASYNC_STORAGE_KEY, JSON.stringify(paylaod));
+  const saveToDoList = async (payload: ToDoList) => {
+    await AsyncStorage.setItem(ASYNC_STORAGE_KEY, JSON.stringify(payload));
   };
+
   const loadToDoList = async () => {
     const stored: string | null = await AsyncStorage.getItem(ASYNC_STORAGE_KEY);
     if (stored) {
@@ -44,7 +32,8 @@ export default function App() {
     }
   };
 
-  const onChangeText = (payload: any) => setText(payload);
+  const onChangeText = (payload: string) => setText(payload);
+
   const addToDo = async () => {
     if (text === '') return;
 
@@ -57,6 +46,7 @@ export default function App() {
     await saveToDoList(newToDoList);
     setText('');
   };
+
   const deleteToDo = (key: string) => {
     Alert.alert('Delete Task', 'Are you sure?', [
       { text: 'Cancel' },
@@ -77,28 +67,7 @@ export default function App() {
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
-      <View style={styles.header}>
-        <TouchableOpacity onPress={work}>
-          <Text
-            style={{
-              ...styles.buttonText,
-              color: working ? theme.white : theme.grey,
-            }}
-          >
-            Work
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={travel}>
-          <Text
-            style={{
-              ...styles.buttonText,
-              color: !working ? theme.white : theme.grey,
-            }}
-          >
-            Travel
-          </Text>
-        </TouchableOpacity>
-      </View>
+      <AppHeader working={working} onWorkPress={work} onTravelPress={travel} />
       <TextInput
         onSubmitEditing={addToDo}
         onChangeText={onChangeText}
@@ -112,56 +81,14 @@ export default function App() {
       <ScrollView>
         {Object.keys(toDoList).map((key: string) =>
           toDoList[key].working === working ? (
-            <View style={styles.toDo} key={key}>
-              <Text style={styles.toDoText}>{toDoList[key].text}</Text>
-              <TouchableOpacity onPress={() => deleteToDo(key)}>
-                <Fontisto name="trash" size={15} color={theme.white} />
-              </TouchableOpacity>
-            </View>
+            <TodoItem
+              key={key}
+              text={toDoList[key].text}
+              onDelete={() => deleteToDo(key)}
+            />
           ) : null
         )}
       </ScrollView>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.background,
-    paddingHorizontal: 20,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 100,
-  },
-  buttonText: {
-    fontSize: 35,
-    fontWeight: '600',
-  },
-  input: {
-    marginTop: 25,
-    marginBottom: 25,
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-    backgroundColor: 'white',
-    borderRadius: 30,
-    fontSize: 15,
-  },
-  toDo: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 10,
-    paddingVertical: 20,
-    paddingHorizontal: 20,
-    backgroundColor: theme.grey,
-    borderRadius: 15,
-    opacity: 0.5,
-  },
-  toDoText: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: 'white',
-  },
-});
