@@ -39,7 +39,7 @@ export default function App() {
 
     const newToDoList = {
       ...toDoList,
-      [Date.now()]: { text, working },
+      [Date.now()]: { text, working, completed: false },
     };
 
     setToDoList(newToDoList);
@@ -64,6 +64,32 @@ export default function App() {
     ]);
   };
 
+  const toggleComplete = async (key: string) => {
+    const newToDoList = {
+      ...toDoList,
+      [key]: {
+        ...toDoList[key],
+        completed: !toDoList[key].completed,
+      },
+    };
+
+    setToDoList(newToDoList);
+    await saveToDoList(newToDoList);
+  };
+
+  const updateToDo = async (key: string, newText: string) => {
+    const newToDoList = {
+      ...toDoList,
+      [key]: {
+        ...toDoList[key],
+        text: newText,
+      },
+    };
+
+    setToDoList(newToDoList);
+    await saveToDoList(newToDoList);
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
@@ -84,7 +110,10 @@ export default function App() {
             <TodoItem
               key={key}
               text={toDoList[key].text}
+              completed={toDoList[key].completed}
               onDelete={() => deleteToDo(key)}
+              onComplete={() => toggleComplete(key)}
+              onUpdate={(newText) => updateToDo(key, newText)}
             />
           ) : null
         )}

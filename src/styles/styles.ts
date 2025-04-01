@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { theme } from './colors';
+import { theme } from '../styles/colors';
 
 export const styles = StyleSheet.create({
   container: {
@@ -27,6 +27,7 @@ export const styles = StyleSheet.create({
   },
   toDo: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 10,
     paddingVertical: 20,
@@ -36,8 +37,36 @@ export const styles = StyleSheet.create({
     opacity: 0.5,
   },
   toDoText: {
+    flex: 1,
     fontSize: 15,
     fontWeight: '500',
+    color: 'white',
+  },
+  completedText: {
+    textDecorationLine: 'line-through',
+    opacity: 0.75,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  actionButton: {
+    padding: 5,
+  },
+  editContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  editInput: {
+    flex: 1,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 5,
+    fontSize: 15,
     color: 'white',
   },
 });
